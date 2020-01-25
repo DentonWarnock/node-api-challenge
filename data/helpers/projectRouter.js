@@ -4,7 +4,22 @@ const Actions = require("./actionModel");
 
 const router = express.Router();
 
-router.post("/", (req, res) => {});
+router.post("/", (req, res, next) => {
+  const newProject = req.body;
+  if (!newProject.name || !newProject.description) {
+    next("Name and Description are required");
+  } else {
+    Projects.insert(newProject)
+      .then(item => {
+        if (item) {
+          res.status(201).json(item);
+        }
+      })
+      .catch(err => {
+        res.status(500).json(err.message);
+      });
+  }
+});
 
 router.post("/:id/actions", (req, res) => {});
 
@@ -12,7 +27,7 @@ router.get("/", (req, res) => {
   Projects.get()
     .then(list => {
       if (list) {
-        res.status(201).json(list);
+        res.status(200).json(list);
       }
     })
     .catch(err => {
@@ -26,7 +41,7 @@ router.get("/:id", (req, res, next) => {
     Projects.get(id)
       .then(project => {
         if (project) {
-          res.status(201).json(project);
+          res.status(200).json(project);
         } else {
           next("A project with that id does not exist");
         }
@@ -37,7 +52,22 @@ router.get("/:id", (req, res, next) => {
   }
 });
 
-router.get("/:id/actions", (req, res) => {});
+router.get("/:id/actions", (req, res, next) => {
+  const { id } = req.params;
+  if (id) {
+    Projects.get(id)
+      .then(project => {
+        if (!project) {
+          next("A project with that id does not exist");
+        } else if (project.actions) {
+          res.status(200).json(project.actions);
+        }
+      })
+      .catch(err => {
+        res.status(500).json(err.message);
+      });
+  }
+});
 
 router.delete("/:id", (req, res) => {});
 

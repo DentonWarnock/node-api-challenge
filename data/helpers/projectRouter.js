@@ -21,7 +21,38 @@ router.post("/", (req, res, next) => {
   }
 });
 
-router.post("/:id/actions", (req, res) => {});
+router.post("/:id/actions", (req, res, next) => {
+  const { id } = req.params;
+  let newAction = req.body;
+  newAction = { project_id: id, ...newAction };
+  if (!newAction.description || !newAction.notes) {
+    next("Action description and notes are required");
+  } else if (newAction.description.length > 128) {
+    next("You've exceeded the maximum description length of 128 characters.");
+  } else {
+    if (id) {
+      Projects.get(id)
+        .then(project => {
+          if (project) {
+            Actions.insert(newAction)
+              .then(item => {
+                if (item) {
+                  res.status(201).json(item);
+                }
+              })
+              .catch(err => {
+                res.status(500).json(err.message);
+              });
+          } else {
+            next("A valid project ID is required");
+          }
+        })
+        .catch(err => {
+          res.status(500).json(err.message);
+        });
+    }
+  }
+});
 
 router.get("/", (req, res) => {
   Projects.get()
@@ -69,9 +100,56 @@ router.get("/:id/actions", (req, res, next) => {
   }
 });
 
-router.delete("/:id", (req, res) => {});
+router.delete("/:id", (req, res, next) => {
+  const { id } = req.params;
+  if (id) {
+    Projects.get(id)
+      .then(project => {
+        if (!project) {
+          next("A project with that id does not exist");
+        } else {
+          Projects.remove(id).then(count => {
+            if (count > 0) {
+              res.status(200).json(`Removed ${count} item from the database`);
+            } else {
+              next("There was a problem removing the item");
+            }
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).json(err.message);
+      });
+  }
+});
 
-router.put("/:id", (req, res) => {});
+router.put("/:id", (req, res, next) => {
+  const newProject = req.body;
+  const { id } = req.params;
+  if (!newProject.name || !newProject.description) {
+    next("Name and Description are required");
+  } else {
+    if (id) {
+      Projects.get(id).then(project => {
+        if (project) {
+          Projects.update(id, newProject)
+            .then(item => {
+              if (item) {
+                res.status(201).json(item);
+              }
+            })
+            .catch(err => {
+              res.status(500).json(err.message);
+            });
+        } else {
+          next("A project with that id does not exist");
+        }
+      });
+    } else {
+      next("Please enter a valid project ID to update");
+    }
+  }
+});
 
 function errorHandler(error, req, res, next) {
   console.log("error: ", error);

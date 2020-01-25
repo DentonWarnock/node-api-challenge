@@ -25,10 +25,11 @@ router.post("/:id/actions", (req, res, next) => {
   const { id } = req.params;
   let newAction = req.body;
   newAction = { project_id: id, ...newAction };
+  descLength = newAction.description.length;
   if (!newAction.description || !newAction.notes) {
     next("Action description and notes are required");
-  } else if (newAction.description.length > 128) {
-    next("You've exceeded the maximum description length of 128 characters.");
+  } else if (descLength > 128) {
+    next("You exceeded the maximum description length of 128 characters.");
   } else {
     if (id) {
       Projects.get(id)
@@ -80,6 +81,8 @@ router.get("/:id", (req, res, next) => {
       .catch(err => {
         res.status(500).json(err.message);
       });
+  } else {
+    next("Please enter a valid project ID");
   }
 });
 
@@ -153,7 +156,7 @@ router.put("/:id", (req, res, next) => {
 
 function errorHandler(error, req, res, next) {
   console.log("error: ", error);
-  res.status(400).json(error);
+  res.status(400).json(error.message);
 }
 
 router.use(errorHandler);

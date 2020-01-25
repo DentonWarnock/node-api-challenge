@@ -40,13 +40,24 @@ Demonstrate your understanding of this Sprint's concepts by answering the follow
 
 - [ ] Mention two parts of Express that you learned about this week.
 
+Express is a powerfull lightweight framework that helps us to create APIs by creating a server and using routes to help manage code.
+
 - [ ] Describe Middleware?
+
+Middleware can be custom built or imported as a third party package and is a function that comes between two processes and adds it's own
+process. It could end the process, change the process, add to the process, or redirect the process depending on the middleware.
 
 - [ ] Describe a Resource?
 
+In regards to RESTFUL APIs a everything is a resouce. Resources are data objects accessed through unique URLs with different types of requests (GET,POST,PUT,DELETE) each returning different resources.
+
 - [ ] What can the API return to help clients know if a request was successful?
 
+The API should return a 200 level response and either a message or a resource when a request is sucessful.
+
 - [ ] How can we partition our application into sub-applications?
+
+By using routers in Express we can seperate the code for each different endpoint into seperate files and then import them into the main server file.
 
 ## Minimum Viable Product
 
